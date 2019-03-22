@@ -19,8 +19,9 @@ module Devise
     end
 
     def call
-      uri      = URI.parse(base_url).tap { |uri| uri.query = nil }
-      uri.path = load_base_path
+      uri        = URI.parse(base_url).tap { |uri| uri.query = nil }
+      uri.scheme = "https"
+      uri.path   = load_base_path
       uri.to_s
     end
 
