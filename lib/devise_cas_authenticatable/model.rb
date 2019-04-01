@@ -5,10 +5,10 @@ module Devise
       def self.included(base)
         base.extend ClassMethods
       end
-      
+
       module ClassMethods
         # Authenticate a CAS ticket and return the resulting user object.  Behavior is as follows:
-        # 
+        #
         # * Check ticket validity using RubyCAS::Client.  Return nil if the ticket is invalid.
         # * Find a matching user by username (will use find_for_authentication if available).
         # * If the user does not exist, but Devise.cas_create_user is set, attempt to create the
@@ -17,7 +17,7 @@ module Devise
         # * Return the resulting user object.
         def authenticate_with_cas_ticket(ticket)
           ::Devise.cas_client.validate_service_ticket(ticket) unless ticket.has_been_validated?
-          
+
           if ticket.is_valid?
             identifier = nil
             ticket_response = ticket.respond_to?(:user) ? ticket : ticket.response
@@ -28,12 +28,14 @@ module Devise
             # or the value is blank, then we're done here
             return log_and_exit if identifier.nil?
 
+            identifier.downcase!
+
             logger.debug("Using conditions {#{::Devise.cas_username_column} => #{identifier}} to find the User")
 
             conditions = { ::Devise.cas_username_column => identifier }
             resource = find_or_build_resource_from_conditions(conditions)
             return nil unless resource
-            
+
             resource.cas_extra_attributes = ticket_response.extra_attributes \
               if resource.respond_to?(:cas_extra_attributes=)
 
